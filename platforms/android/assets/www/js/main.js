@@ -1,3 +1,6 @@
+var thisUserId;
+
+
 $(document).on("pagecreate", "#page_posts", function (event) {
     //$(function (event, data) {
     $.getJSON(encodeURI("http://sbawebdev-dataparser.rhcloud.com/api/get_recent_posts/"), function (data) {
@@ -22,6 +25,7 @@ $(document).on("pagecreate", "#page_posts", function (event) {
     //});
 });
 
+
 $(document).on("pagecreate", "#page_viewpost", function (event) {
     $.getJSON(encodeURI("http://sbawebdev-dataparser.rhcloud.com/api/get_post/?post_id=" + localStorage.postid), function (data) {
         var h3 = document.createElement("h3");
@@ -34,13 +38,54 @@ $(document).on("pagecreate", "#page_viewpost", function (event) {
         text = document.createTextNode(data.post.content);
         //p.appendChild(text);
         $(el).append(text);
-
     });
-
-
 });
 
-$(document).on("pagecreate", function(event){
-    var $page = $(this);
-    $page.css("top", "-1px");
+$(document).on("mobileinit", function () {
+    //$.mobile.pageContainer = $("#container"); /* different pagecontainer (not <body>) */
+    $.mobile.hideUrlBar = false;
 });
+
+
+$(document).on("pagecreate", "#page_index", function (event) {
+    navigator.geolocation.getCurrentPosition(onGeoSuccess, onGeoError);
+});
+
+function onGeoSuccess(position) {
+    var element = document.getElementById('geolocation');
+    element.innerHTML = 'Latitude: ' + position.coords.latitude + '<br />' +
+        'Longitude: ' + position.coords.longitude + '<br />' +
+        'Altitude: ' + position.coords.altitude + '<br />' +
+        'Accuracy: ' + position.coords.accuracy + '<br />' +
+        'Altitude Accuracy: ' + position.coords.altitudeAccuracy + '<br />' +
+        'Heading: ' + position.coords.heading + '<br />' +
+        'Speed: ' + position.coords.speed + '<br />' +
+        'Timestamp: ' + position.timestamp + '<br />' +
+        'test distance:' + distanceBetweenCoordinates(43.8982226, -79.46687, 43.8982841, -79.46684010000001);
+}
+
+// onError Callback receives a PositionError object
+function onGeoError(error) {
+    alert('code: ' + error.code + '\n' +
+        'message: ' + error.message + '\n');
+}
+
+//Returns distance between 2 points in meters
+function distanceBetweenCoordinates(lat1, long1, lat2, long2) {
+    var latDif, longDif, centralAngle, distance, earthRadius;
+
+    earthRadius = 6371;
+    latDif = Math.abs(lat1 - lat2);
+    longDif = Math.abs(long1 - long2);
+
+    centralAngle = 2 * Math.asin(
+            Math.sqrt(
+                Math.pow(Math.sin(latDif / 2), 2) +
+                Math.cos(lat1) * Math.cos(lat2) *
+                Math.pow(Math.sin(longDif / 2), 2)
+            ));
+
+    distance = Math.PI / 180 * centralAngle * earthRadius;
+
+    return Math.round(distance * 1000);
+}
